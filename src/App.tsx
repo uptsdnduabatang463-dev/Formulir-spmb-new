@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwrWuGePEVh3h3Kj0IprB-t8PkJ5xd4s29riaoPxZSw_ukrjF0ymZgUVDWLO7jXObj0/exec";
+  "https://script.google.com/macros/s/AKfycbwB7a-pfJzIPBzfc7zH3kQi5IvPG9guEJBBlH2c-t7N66EDbpkWtJOWPQNGf2IMVCoI/exec";
 
 const COLUMNS = [
   { key: "namaLengkap", label: "Nama Lengkap" },
@@ -268,9 +268,31 @@ export default function PageForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
-    setUploadProgress("Menyiapkan data...");
+    setUploadProgress("Memeriksa data duplikat...");
 
     try {
+      // ── CEK DUPLIKAT ──
+      const checkUrl = new URL(SCRIPT_URL);
+      checkUrl.searchParams.set("action", "checkDuplicate");
+      checkUrl.searchParams.set("nama", formData.namaLengkap.trim());
+      checkUrl.searchParams.set("nik", formData.nik.trim());
+
+      const checkRes = await fetch(checkUrl.toString());
+      const checkJson = await checkRes.json();
+
+      if (checkJson.duplicate) {
+        alert(
+          `⚠️ Data sudah ada!\n\n` +
+            `${checkJson.field} yang Anda masukkan sudah terdaftar di sistem.\n` +
+            `Silakan periksa kembali data yang diisi.`
+        );
+        setStatus("idle");
+        setUploadProgress("");
+        return;
+      }
+
+      setUploadProgress("Menyiapkan data...");
+
       const fileData: {
         [key: string]: {
           base64: string;
@@ -456,6 +478,7 @@ export default function PageForm() {
         <F
           name="nik"
           label="NIK (Nomor Induk Kependudukan)"
+          required
           inputMode="numeric"
           pattern="[0-9]*"
           onInput={(e: React.FormEvent<HTMLInputElement>) => {
