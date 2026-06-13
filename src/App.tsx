@@ -249,6 +249,7 @@ export default function PageForm() {
     fotoSiswa: null,
   });
   const [status, setStatus] = useState("idle");
+  const [successName, setSuccessName] = useState("");
   const [uploadProgress, setUploadProgress] = useState("");
 
   const handleChange = (
@@ -391,19 +392,9 @@ export default function PageForm() {
       });
 
       if (response.ok || response.type === "opaque") {
+        setSuccessName(formData.namaLengkap);
         setStatus("success");
         setUploadProgress("");
-        setTimeout(() => {
-          setFormData(EMPTY_FORM);
-          setFiles({
-            fotokopiAktaLahir: null,
-            fotokopiKK: null,
-            fotokopiSktbTk: null,
-            kartuKesejahteraan: null,
-            fotoSiswa: null,
-          });
-          setStatus("idle");
-        }, 2500);
       } else {
         setStatus("error");
         setUploadProgress("");
@@ -414,6 +405,60 @@ export default function PageForm() {
       setUploadProgress("");
     }
   };
+
+  const WA_NUMBER = "6289521798599"; // ← ganti nomor WA sekolah
+
+  // ✅ TAMBAHKAN DI SINI — tepat sebelum return utama
+  if (status === "success" && successName) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-6">
+        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">✅</span>
+          </div>
+          <div className="inline-block bg-green-600 text-white px-4 py-1 rounded-full text-xs font-semibold tracking-widest uppercase mb-4 shadow">
+            Pendaftaran Berhasil
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            {successName}
+          </h2>
+          <p className="text-gray-600 mb-1 text-sm">
+            telah berhasil melakukan pendaftaran secara online di
+          </p>
+          <p className="text-blue-700 font-semibold mb-6">UPT SDN 2 BATANG</p>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-left">
+            <p className="text-amber-800 font-semibold text-sm mb-1">
+              📸 Langkah Selanjutnya:
+            </p>
+            <ol className="text-amber-700 text-sm space-y-1 list-decimal list-inside">
+              <li>Screenshot halaman ini sebagai bukti pendaftaran</li>
+              <li>
+                Kirim screenshot ke WhatsApp sekolah lewat tombol di bawah
+              </li>
+            </ol>
+          </div>
+
+          {/* Tombol WA — langsung buka chat */}
+          <a
+            href={`https://wa.me/${WA_NUMBER}?text=Assalamualaikum%2C%20saya%20ingin%20mengirimkan%20bukti%20pendaftaran%20online%20atas%20nama%20*${encodeURIComponent(
+              successName
+            )}*`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl shadow transition w-full justify-center"
+          >
+            <span className="text-xl">💬</span>
+            {" Kirim Bukti via WhatsApp"}
+          </a>
+
+          <p className="text-xs text-gray-400 mt-4">
+            Simpan screenshot ini dan tunjukkan saat datang ke sekolah.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="p-8">
